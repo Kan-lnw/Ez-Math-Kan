@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ez คณิต">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#060914">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23060914'/%3E%3Ctext x='50' y='62' font-size='46' text-anchor='middle' fill='%23c6ff3d'%3E🚀%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23060914'/%3E%3Ctext x='50' y='62' font-size='46' text-anchor='middle' fill='%23c6ff3d'%3E🚀%3C/text%3E%3C/svg%3E">
+<title>Ez คณิต | Math Rocket</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700;800&display=swap');
+
+  :root{
+    --bg: #060914;
+    --bg-2: #0d1428;
+    --panel: #101a34;
+    --line: #23304f;
+    --text: #e8ecf7;
+    --dim: #7c88ad;
+    --volt: #c6ff3d;
+    --volt-dim: #8fb82c;
+    --hot: #ff5d5d;
+    --amber: #ffb84d;
+    --cyan: #4dd9ff;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+
+  body{
+    background:
+      radial-gradient(1.5px 1.5px at 20px 30px, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 120px 80px, rgba(255,255,255,0.35), transparent),
+      radial-gradient(1px 1px at 200px 150px, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1.5px 1.5px at 300px 40px, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1px 1px at 60px 200px, rgba(255,255,255,0.4), transparent),
+      radial-gradient(circle at 15% -10%, rgba(198,255,61,0.07), transparent 40%),
+      radial-gradient(circle at 90% 110%, rgba(77,217,255,0.07), transparent 40%),
+      var(--bg);
+    background-size: 340px 240px, 340px 240px, 340px 240px, 340px 240px, 340px 240px, auto, auto, auto;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .rig{ width: 100%; max-width: 560px; }
+
+  .board{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 22px;
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    margin-bottom: 14px;
+  }
+  .brand{ display:flex; flex-direction: column; line-height: 1; }
+  .brand .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em; color: var(--volt);
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .brand .name{ font-weight: 700; font-size: 20px; letter-spacing: -0.02em; }
+
+  .stat-cluster{ display:flex; gap: 22px; }
+  .stat{ text-align:right; }
+  .stat .num{
+    font-family:'JetBrains Mono', monospace; font-weight: 800; font-size: 26px;
+    line-height:1; font-variant-numeric: tabular-nums;
+  }
+  .stat .lbl{
+    font-family:'JetBrains Mono', monospace; font-size: 10px; color: var(--dim);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px;
+  }
+  #timeStat.low .num{ color: var(--hot); }
+  #streakStat .num{ color: var(--amber); }
+  #timeStat.boost .num{ color: var(--cyan); }
+
+  /* Rocket track */
+  .track{
+    position: relative;
+    height: 46px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .track-line{
+    position: absolute;
+    left: 14px; right: 14px; top: 50%;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, var(--line) 0 8px, transparent 8px 16px);
+    transform: translateY(-50%);
+  }
+  .track-goal{
+    position: absolute;
+    right: 12px; top: 50%; transform: translateY(-50%);
+    font-size: 16px; opacity: 0.6;
+  }
+  .rocket{
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translate(-4px, -50%) rotate(90deg);
+    font-size: 22px;
+    transition: left 0.9s cubic-bezier(.4,1.4,.5,1);
+    filter: drop-shadow(0 0 6px rgba(198,255,61,0.5));
+  }
+  .rocket.boost{
+    animation: rocketBoost 0.5s ease;
+  }
+  @keyframes rocketBoost{
+    0%{ filter: drop-shadow(0 0 6px rgba(77,217,255,0.9)); transform: translate(-4px, -50%) rotate(90deg) scale(1.4); }
+    100%{ filter: drop-shadow(0 0 6px rgba(198,255,61,0.5)); transform: translate(-4px, -50%) rotate(90deg) scale(1); }
+  }
+  .boost-flash{
+    position: absolute;
+    top: 6px; left: 0; right: 0;
+    text-align: center;
+    font-family:'JetBrains Mono', monospace;
+    font-weight: 800; font-size: 13px;
+    color: var(--cyan);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .boost-flash.show{ animation: boostPop 0.9s ease-out forwards; }
+  @keyframes boostPop{
+    0%{ opacity: 0; transform: translateY(6px); }
+    25%{ opacity: 1; transform: translateY(0); }
+    100%{ opacity: 0; transform: translateY(-16px); }
+  }
+
+  .stage{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 56px 32px;
+    text-align:center;
+    position: relative;
+    overflow:hidden;
+  }
+  .stage::before{
+    content:'';
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(198,255,61,0.05), transparent 60%);
+    pointer-events:none;
+  }
+  .problem{
+    font-family:'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: clamp(40px, 11vw, 64px);
+    letter-spacing: -0.01em;
+    margin-bottom: 30px;
+    font-variant-numeric: tabular-nums;
+    min-height: 1.2em;
+  }
+  .problem .op{ color: var(--volt); margin: 0 14px; }
+
+  .answer-row{ display:flex; justify-content:center; }
+  #answerInput{
+    width: 220px; max-width: 70%;
+    background: var(--bg-2);
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    color: var(--text);
+    font-family:'JetBrains Mono', monospace;
+    font-weight: 700; font-size: 30px;
+    text-align:center; padding: 12px 10px;
+    outline:none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    font-variant-numeric: tabular-nums;
+  }
+  #answerInput:focus{
+    border-color: var(--volt);
+    box-shadow: 0 0 0 4px rgba(198,255,61,0.12);
+  }
+  #answerInput.wrong{ border-color: var(--hot); animation: shake 0.28s; }
+  @keyframes shake{ 25%{ transform: translateX(-6px); } 75%{ transform: translateX(6px); } }
+
+  .flash{
+    position:absolute; top: 18px; right: 22px;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 700; color: var(--volt);
+    opacity: 0;
+  }
+  .flash.show{ animation: pop 0.6s ease-out forwards; }
+  @keyframes pop{
+    0%{ opacity: 0; transform: translateY(4px); }
+    30%{ opacity: 1; transform: translateY(0); }
+    100%{ opacity: 0; transform: translateY(-14px); }
+  }
+
+  .overlay{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 44px 32px;
+    text-align:center;
+  }
+  .overlay h1{ font-size: clamp(26px, 6vw, 36px); margin: 0 0 10px; letter-spacing: -0.02em; }
+  .overlay p{ color: var(--dim); margin: 0 0 26px; font-size: 15px; line-height: 1.6; }
+
+  .field{
+    width: 100%; max-width: 280px;
+    margin: 0 auto 18px;
+    display:flex; flex-direction: column; gap: 8px;
+    text-align: left;
+  }
+  .field label{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.1em; color: var(--dim); text-transform: uppercase;
+  }
+  .field input{
+    background: var(--bg-2);
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600; font-size: 17px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus{ border-color: var(--volt); }
+
+  .result{
+    font-family:'JetBrains Mono', monospace;
+    font-weight: 800; font-size: 60px; color: var(--volt);
+    line-height: 1; margin-bottom: 6px; font-variant-numeric: tabular-nums;
+  }
+  .result-lbl{
+    font-family:'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.14em; color: var(--dim); text-transform: uppercase; margin-bottom: 10px;
+  }
+  .rank-lbl{
+    font-family:'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--cyan); margin-bottom: 26px;
+  }
+  .sub-results{ display:flex; justify-content:center; gap: 28px; margin-bottom: 30px; flex-wrap: wrap; }
+  .sub-results div .num{ font-family:'JetBrains Mono', monospace; font-weight: 700; font-size: 20px; }
+  .sub-results div .lbl{
+    font-family:'JetBrains Mono', monospace; font-size: 10px; color: var(--dim);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px;
+  }
+
+  .btn-row{ display:flex; gap: 10px; justify-content:center; flex-wrap: wrap; }
+  .go-btn{
+    font-family:'JetBrains Mono', monospace; font-weight: 700; font-size: 15px;
+    letter-spacing: 0.04em;
+    background: var(--volt); color: #0b1020; border: none;
+    padding: 14px 30px; border-radius: 10px; cursor:pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .go-btn:hover{ transform: translateY(-2px); box-shadow: 0 8px 20px rgba(198,255,61,0.18); }
+  .go-btn:active{ transform: translateY(0); }
+  .go-btn.ghost{
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--line);
+  }
+  .go-btn.ghost:hover{ border-color: var(--volt-dim); box-shadow:none; }
+
+  .logout-link{
+    display:block; margin-top: 20px;
+    font-family:'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--dim); text-decoration: underline; cursor: pointer;
+    background: none; border: none;
+  }
+  .logout-link:hover{ color: var(--text); }
+
+  .hello{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.08em; color: var(--dim);
+    margin-bottom: 4px; text-transform: uppercase;
+  }
+
+  /* Best stat */
+  .best-stat{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 13px; letter-spacing: 0.04em; color: var(--amber);
+    margin-bottom: 22px;
+  }
+
+  /* Back button */
+  .board-left{ display:flex; align-items:center; gap: 10px; }
+  .back-btn{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text);
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink: 0;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .back-btn:hover{ border-color: var(--volt-dim); background: rgba(198,255,61,0.06); }
+  .back-btn:active{ transform: translateY(1px); }
+
+  .hidden{ display:none !important; }
+
+  footer{
+    text-align:center; color: var(--dim);
+    font-family:'JetBrains Mono', monospace; font-size: 11px;
+    margin-top: 16px; letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 420px){
+    .stage{ padding: 44px 18px; }
+    .stat-cluster{ gap: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="rig">
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="overlay">
+    <h1>🚀 Ez คณิต</h1>
+    <p>ลงชื่อเข้าใช้ด้วยชื่อเล่นของคุณ<br>เพื่อบันทึกสถิติที่ดีที่สุดของคุณ</p>
+    <div class="field">
+      <label for="nameInput">ชื่อเล่น</label>
+      <input id="nameInput" type="text" maxlength="16" placeholder="เช่น กานต์">
+    </div>
+    <button class="go-btn" id="loginBtn">เข้าสู่ระบบ</button>
+  </div>
+
+  <!-- START SCREEN -->
+  <div id="startScreen" class="overlay hidden">
+    <div class="hello" id="helloText">สวัสดี</div>
+    <h1>Ez คณิต</h1>
+    <div class="best-stat" id="startBestStat">สถิติที่ดีที่สุด: 0 คะแนน</div>
+    <div class="btn-row">
+      <button class="go-btn" id="startBtn">เริ่มเกม</button>
+    </div>
+    <button class="logout-link" id="logoutBtn">ออกจากระบบ</button>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="gameScreen" class="hidden">
+    <div class="board">
+      <div class="board-left">
+        <button class="back-btn" id="backBtn" title="กลับ">⬅</button>
+        <div class="brand">
+          <div class="eyebrow">Math Rocket</div>
+          <div class="name" id="playerLabel">Ez คณิต</div>
+        </div>
+      </div>
+      <div class="stat-cluster">
+        <div class="stat" id="streakStat">
+          <div class="num" id="streakNum">0</div>
+          <div class="lbl">ติดต่อกัน</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="scoreNum">0</div>
+          <div class="lbl">คะแนน</div>
+        </div>
+        <div class="stat" id="timeStat">
+          <div class="num" id="timeNum">60</div>
+          <div class="lbl">วินาที</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="boost-flash" id="boostFlash">+2.5 วิ 🚀</div>
+      <div class="track-line"></div>
+      <div class="track-goal">🏁</div>
+      <div class="rocket" id="rocket">🚀</div>
+    </div>
+
+    <div class="stage">
+      <div class="flash" id="flash">+10</div>
+      <div class="problem" id="problem">3 <span class="op">+</span> 4</div>
+      <div class="answer-row">
+        <input id="answerInput" type="tel" inputmode="numeric" autocomplete="off" placeholder="?">
+      </div>
+    </div>
+  </div>
+
+  <!-- END SCREEN -->
+  <div id="endScreen" class="overlay hidden">
+    <div class="result" id="finalScore">0</div>
+    <div class="result-lbl">คะแนนรวม</div>
+    <div class="rank-lbl" id="rankLbl">กำลังบันทึกคะแนน...</div>
+    <div class="sub-results">
+      <div><div class="num" id="finalCorrect">0</div><div class="lbl">ข้อถูก</div></div>
+      <div><div class="num" id="finalBest">0</div><div class="lbl">สตรีคสูงสุด</div></div>
+      <div><div class="num" id="finalBoosts">0</div><div class="lbl">ครั้งที่พุ่ง</div></div>
+    </div>
+    <div class="btn-row">
+      <button class="go-btn" id="againBtn">เล่นอีกครั้ง</button>
+      <button class="go-btn ghost" id="homeBtn">🏠 กลับหน้าหลัก</button>
+    </div>
+  </div>
+
+  <footer>ENTER เพื่อยืนยันคำตอบ</footer>
+</div>
+
+<script>
+(function(){
+  const loginScreen = document.getElementById('loginScreen');
+  const startScreen = document.getElementById('startScreen');
+  const gameScreen = document.getElementById('gameScreen');
+  const endScreen = document.getElementById('endScreen');
+
+  const nameInput = document.getElementById('nameInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const helloText = document.getElementById('helloText');
+  const playerLabel = document.getElementById('playerLabel');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const startBestStat = document.getElementById('startBestStat');
+
+  const startBtn = document.getElementById('startBtn');
+  const againBtn = document.getElementById('againBtn');
+  const homeBtn = document.getElementById('homeBtn');
+  const backBtn = document.getElementById('backBtn');
+
+  const problemEl = document.getElementById('problem');
+  const answerInput = document.getElementById('answerInput');
+  const scoreNum = document.getElementById('scoreNum');
+  const streakNum = document.getElementById('streakNum');
+  const timeNum = document.getElementById('timeNum');
+  const timeStat = document.getElementById('timeStat');
+  const rocket = document.getElementById('rocket');
+  const boostFlash = document.getElementById('boostFlash');
+  const flash = document.getElementById('flash');
+
+  const finalScore = document.getElementById('finalScore');
+  const finalCorrect = document.getElementById('finalCorrect');
+  const finalBest = document.getElementById('finalBest');
+  const finalBoosts = document.getElementById('finalBoosts');
+  const rankLbl = document.getElementById('rankLbl');
+
+  const DURATION = 60;
+  const QUICK_MS = 3000;
+  const MAX_TRACK_TIME = 90; // visual reference for rocket position
+
+  let playerName = '';
+  let score = 0, streak = 0, bestStreak = 0, correctCount = 0, boostCount = 0;
+  let timeLeft = DURATION;
+  let timer = null;
+  let currentAnswer = 0;
+  let questionStart = 0;
+
+  function rand(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  // ---------- storage helpers (localStorage, works on any host) ----------
+  async function getPlayerName(){
+    try{
+      const v = localStorage.getItem('player:name');
+      return v || '';
+    }catch(e){ return ''; }
+  }
+  async function setPlayerName(name){
+    try{ localStorage.setItem('player:name', name); }catch(e){}
+  }
+  async function clearPlayerName(){
+    try{ localStorage.removeItem('player:name'); }catch(e){}
+  }
+  async function getBestScore(){
+    try{
+      const v = localStorage.getItem('player:bestScore');
+      if(!v) return 0;
+      const n = parseInt(v, 10);
+      return isNaN(n) ? 0 : n;
+    }catch(e){ return 0; }
+  }
+  async function setBestScore(score){
+    try{ localStorage.setItem('player:bestScore', String(score)); }catch(e){}
+  }
+  async function refreshBestStat(){
+    const best = await getBestScore();
+    startBestStat.textContent = 'สถิติที่ดีที่สุด: ' + best + ' คะแนน';
+    return best;
+  }
+
+  // ---------- login flow ----------
+  async function initLogin(){
+    const saved = await getPlayerName();
+    if(saved){
+      playerName = saved;
+      goToStart();
+    } else {
+      loginScreen.classList.remove('hidden');
+      startScreen.classList.add('hidden');
+      nameInput.focus();
+    }
+  }
+
+  function goToStart(){
+    loginScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    gameScreen.classList.add('hidden');
+    startScreen.classList.remove('hidden');
+    helloText.textContent = 'สวัสดี, ' + playerName;
+    playerLabel.textContent = playerName;
+    refreshBestStat();
+  }
+
+  loginBtn.addEventListener('click', async () => {
+    const val = nameInput.value.trim();
+    if(!val) { nameInput.focus(); return; }
+    playerName = val.slice(0, 16);
+    await setPlayerName(playerName);
+    goToStart();
+  });
+  nameInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') loginBtn.click();
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    await clearPlayerName();
+    playerName = '';
+    nameInput.value = '';
+    startScreen.classList.add('hidden');
+    loginScreen.classList.remove('hidden');
+    nameInput.focus();
+  });
+
+  // ---------- game logic ----------
+  function genProblem(){
+    let a, b, op, answer;
+    const ops = ['+', '-', '×', '÷'];
+    op = ops[rand(0, 3)];
+
+    if(op === '+'){
+      a = rand(100, 899);
+      b = rand(100, 999 - a);
+      answer = a + b;
+    } else if(op === '-'){
+      a = rand(200, 999);
+      b = rand(100, a - 1);
+      answer = a - b;
+    } else if(op === '×'){
+      a = rand(2, 13);
+      b = rand(2, 13);
+      answer = a * b;
+    } else {
+      b = rand(2, 12);
+      const maxQ = Math.floor(100 / b);
+      const q = rand(1, maxQ);
+      a = b * q;
+      answer = q;
+    }
+
+    currentAnswer = answer;
+    problemEl.innerHTML = a + ' <span class="op">' + op + '</span> ' + b;
+    questionStart = performance.now();
+  }
+
+  function showFlash(text, isGood){
+    flash.textContent = text;
+    flash.style.color = isGood ? 'var(--volt)' : 'var(--hot)';
+    flash.classList.remove('show');
+    void flash.offsetWidth;
+    flash.classList.add('show');
+  }
+
+  function updateRocketPosition(){
+    const pct = Math.max(0, Math.min(100, (timeLeft / MAX_TRACK_TIME) * 100));
+    rocket.style.left = 'calc(' + pct + '% - 4px)';
+  }
+
+  function triggerBoost(){
+    boostCount++;
+    timeLeft = Math.min(timeLeft + 2.5, 999);
+    timeNum.textContent = Math.round(timeLeft);
+    timeStat.classList.add('boost');
+    setTimeout(() => timeStat.classList.remove('boost'), 500);
+    rocket.classList.remove('boost');
+    void rocket.offsetWidth;
+    rocket.classList.add('boost');
+    boostFlash.classList.remove('show');
+    void boostFlash.offsetWidth;
+    boostFlash.classList.add('show');
+    updateRocketPosition();
+  }
+
+  function checkAnswer(){
+    const val = answerInput.value.trim();
+    if(val === '') return;
+    const num = parseInt(val, 10);
+    if(num === currentAnswer){
+      const reactMs = performance.now() - questionStart;
+      correctCount++;
+      streak++;
+      bestStreak = Math.max(bestStreak, streak);
+      const multiplier = streak >= 5 ? 2 : 1;
+      const gained = 1 * multiplier;
+      score += gained;
+      showFlash('+' + gained + (multiplier > 1 ? ' ×2' : ''), true);
+      scoreNum.textContent = score;
+      streakNum.textContent = streak;
+      answerInput.classList.remove('wrong');
+
+      if(reactMs < QUICK_MS){
+        triggerBoost();
+      }
+
+      genProblem();
+    } else {
+      streak = 0;
+      streakNum.textContent = 0;
+      showFlash('ผิด', false);
+      answerInput.classList.remove('wrong');
+      void answerInput.offsetWidth;
+      answerInput.classList.add('wrong');
+    }
+    answerInput.value = '';
+  }
+
+  answerInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') checkAnswer();
+  });
+
+  function tick(){
+    timeLeft--;
+    timeNum.textContent = Math.max(0, Math.round(timeLeft));
+    updateRocketPosition();
+    if(timeLeft <= 10){ timeStat.classList.add('low'); }
+    if(timeLeft <= 0){ endGame(); }
+  }
+
+  function startGame(){
+    score = 0; streak = 0; bestStreak = 0; correctCount = 0; boostCount = 0;
+    timeLeft = DURATION;
+    scoreNum.textContent = 0;
+    streakNum.textContent = 0;
+    timeNum.textContent = DURATION;
+    timeStat.classList.remove('low');
+    rocket.style.left = '14px';
+    rocket.classList.remove('boost');
+
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    gameScreen.classList.remove('hidden');
+
+    genProblem();
+    updateRocketPosition();
+    answerInput.value = '';
+    answerInput.focus();
+
+    clearInterval(timer);
+    timer = setInterval(tick, 1000);
+
+    history.pushState({ screen: 'game' }, '', location.href);
+  }
+
+  function quitToStart(){
+    clearInterval(timer);
+    gameScreen.classList.add('hidden');
+    goToStart();
+  }
+
+  async function endGame(){
+    clearInterval(timer);
+    gameScreen.classList.add('hidden');
+    endScreen.classList.remove('hidden');
+
+    finalScore.textContent = score;
+    finalCorrect.textContent = correctCount;
+    finalBest.textContent = bestStreak;
+    finalBoosts.textContent = boostCount;
+    rankLbl.textContent = 'กำลังบันทึกสถิติ...';
+
+    const prevBest = await getBestScore();
+    if(score > prevBest){
+      await setBestScore(score);
+      rankLbl.textContent = '🎉 สถิติใหม่ที่ดีที่สุด! (' + score + ' คะแนน)';
+    } else {
+      rankLbl.textContent = 'สถิติที่ดีที่สุดของคุณ: ' + prevBest + ' คะแนน';
+    }
+
+    await refreshBestStat();
+  }
+
+  startBtn.addEventListener('click', startGame);
+  againBtn.addEventListener('click', startGame);
+  homeBtn.addEventListener('click', goToStart);
+  backBtn.addEventListener('click', () => {
+    history.back();
+  });
+
+  window.addEventListener('popstate', () => {
+    if(!gameScreen.classList.contains('hidden')){
+      quitToStart();
+    }
+  });
+
+  initLogin();
+})();
+</script>
+
+</body>
+</html>
