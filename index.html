@@ -667,6 +667,15 @@
     goToStart();
   }
 
+ function submitScoreToForm(name, scoreVal, correct, bestStreakVal){
+  const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScD30rlvSXxv0ADEg5ewMk6xf7Xlq1EFKumrS-KOELuAKlBQg/formResponse';
+  const data = new FormData();
+  data.append('entry.1726492712', name);
+  data.append('entry.360697678', scoreVal);
+  data.append('entry.861027194', correct);
+  data.append('entry.909423163', bestStreakVal);
+  fetch(formUrl, { method: 'POST', mode: 'no-cors', body: data }).catch(() => {});
+ }
   async function endGame(){
     clearInterval(timer);
     gameScreen.classList.add('hidden');
@@ -677,6 +686,7 @@
     finalBest.textContent = bestStreak;
     finalBoosts.textContent = boostCount;
     rankLbl.textContent = 'กำลังบันทึกสถิติ...';
+    submitScoreToForm(playerName, score, correctCount, bestStreak);
 
     const prevBest = await getBestScore();
     if(score > prevBest){
